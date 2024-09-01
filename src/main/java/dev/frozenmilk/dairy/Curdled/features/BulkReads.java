@@ -1,4 +1,4 @@
-package Curdled.features;
+package dev.frozenmilk.dairy.Curdled.features;
 
 import androidx.annotation.NonNull;
 
@@ -20,22 +20,16 @@ import dev.frozenmilk.dairy.core.FeatureRegistrar;
 import dev.frozenmilk.dairy.core.dependency.Dependency;
 import dev.frozenmilk.dairy.core.dependency.annotation.SingleAnnotation;
 import dev.frozenmilk.dairy.core.wrapper.Wrapper;
-import dev.frozenmilk.util.cell.LateInitCell;
 import kotlin.annotation.MustBeDocumented;
 
 public class BulkReads implements Feature {
-    private final LateInitCell<Attach> attachCell = new LateInitCell<>();
-
     private final Dependency<?> dependency =
             new SingleAnnotation<>(Attach.class)
-                    .onResolve((attach) -> { })
-                    .onResolve(attachCell);
-
+                    .onResolve((attach) -> { });
     @NonNull
     @Override
     public Dependency<?> getDependency() { return dependency; }
 
-    private Attach getAttach() { return attachCell.get(); }
     private BulkReads() { FeatureRegistrar.registerFeature(this); }
 
     private static final BulkReads INSTANCE = new BulkReads();
@@ -80,7 +74,7 @@ public class BulkReads implements Feature {
     public void preUserStopHook(@NotNull Wrapper opMode) { clearCache(); }
 
     @Override
-    public void postUserStopHook(@NotNull Wrapper opMode) { attachCell.invalidate(); }
+    public void postUserStopHook(@NotNull Wrapper opMode) { }
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     @MustBeDocumented

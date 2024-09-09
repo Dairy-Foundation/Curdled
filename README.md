@@ -1,2 +1,2 @@
-# Curdled
-Super unsable features you probably don't want to use
+# Curdled 
+Unstable features you probably shouldn't use

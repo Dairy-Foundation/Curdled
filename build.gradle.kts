@@ -39,21 +39,19 @@ android {
 }
 
 repositories {
-	maven("https://www.jitpack.io")
+	maven("https://repo.dairy.foundation/releases")
 }
 
 dependencies {
 	//noinspection GradleDependency
 	implementation("androidx.appcompat:appcompat:1.2.0")
-	testImplementation("org.testng:testng:6.9.6")
+	testImplementation(testFixtures(project(":Core")))
 
 	compileOnly(project(":Core"))
-	testImplementation(project(":Core"))
-
-	compileOnly("com.github.Dairy-Foundation:CachingHardware:v1")
-	compileOnly("org.firstinspires.ftc:RobotCore:9.1.0")
-	compileOnly("org.firstinspires.ftc:Hardware:9.1.0")
-	compileOnly("org.firstinspires.ftc:FtcCommon:9.1.0")
+	compileOnly("dev.frozenmilk.dairy:CachingHardware:1.0.0")
+	compileOnly("org.firstinspires.ftc:RobotCore:10.0.0")
+	compileOnly("org.firstinspires.ftc:Hardware:10.0.0")
+	compileOnly("org.firstinspires.ftc:FtcCommon:10.0.0")
 }
 
 publishing {
@@ -61,7 +59,7 @@ publishing {
 		register<MavenPublication>("release") {
 			groupId = "dev.frozenmilk.dairy"
 			artifactId = "Curdled"
-			version = "v0.0.0"
+			version = "0.0.0"
 
 			afterEvaluate {
 				from(components["release"])

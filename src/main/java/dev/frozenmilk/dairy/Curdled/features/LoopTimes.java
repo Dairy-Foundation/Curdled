@@ -12,30 +12,32 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import dev.frozenmilk.dairy.core.Feature;
-import dev.frozenmilk.dairy.core.FeatureRegistrar;
 import dev.frozenmilk.dairy.core.dependency.Dependency;
 import dev.frozenmilk.dairy.core.dependency.annotation.SingleAnnotation;
 import dev.frozenmilk.dairy.core.wrapper.Wrapper;
-import kotlin.annotation.MustBeDocumented;
 
 public class LoopTimes implements Feature {
-    private final Dependency<?> dependency =
-            new SingleAnnotation<>(Attach.class)
-                    .onResolve((attach) -> { });
+    private Dependency<?> dependency = new SingleAnnotation<>(Attach.class);
+    
     @NonNull
     @Override
     public Dependency<?> getDependency() { return dependency; }
+    
+    @Override
+    public void setDependency(@NonNull Dependency<?> dependency) {
+        this.dependency = dependency;
+    }
+    
+    private LoopTimes() {}
 
-    private LoopTimes() { FeatureRegistrar.registerFeature(this); }
-
-    private static final LoopTimes INSTANCE = new LoopTimes();
-    private static Telemetry telemetry;
+    public static final LoopTimes INSTANCE = new LoopTimes();
+    // todo, this can't be final, needs to be set in init
     private final long startTime = System.nanoTime();
     private long lastTime = startTime;
     private int loops = 0;
 
 
-    private void time(){
+    private void time(@NonNull Telemetry telemetry){
         long currentTime = System.nanoTime();
         double instantLoopTime = .000001 * (currentTime - lastTime);
         double instantHz = 1 / (instantLoopTime / 1000);
@@ -57,35 +59,26 @@ public class LoopTimes implements Feature {
 
     @Override
     public void postUserInitHook(@NotNull Wrapper opMode) {
-        telemetry = opMode.getOpMode().telemetry;
-        time(); 
+        time(opMode.getOpMode().telemetry);
     }
-    @Override
-    public void preUserInitLoopHook(@NotNull Wrapper opMode) { }
 
     @Override
-    public void postUserInitLoopHook(@NotNull Wrapper opMode) { time(); }
+    public void postUserInitLoopHook(@NotNull Wrapper opMode) {
+        time(opMode.getOpMode().telemetry);
+    }
 
     @Override
-    public void preUserStartHook(@NotNull Wrapper opMode) { }
+    public void postUserStartHook(@NotNull Wrapper opMode) {
+        time(opMode.getOpMode().telemetry);
+    }
 
     @Override
-    public void postUserStartHook(@NotNull Wrapper opMode) { time(); }
-
-    @Override
-    public void preUserLoopHook(@NotNull Wrapper opMode) { }
-
-    @Override
-    public void postUserLoopHook(@NotNull Wrapper opMode) { time(); }
-
-    @Override
-    public void preUserStopHook(@NotNull Wrapper opMode) { }
-
-    @Override
-    public void postUserStopHook(@NotNull Wrapper opMode) { }
+    public void postUserLoopHook(@NotNull Wrapper opMode) {
+        time(opMode.getOpMode().telemetry);
+    }
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    @MustBeDocumented
     @Inherited
-    public @interface Attach { }
+    public @interface Attach {}
 }

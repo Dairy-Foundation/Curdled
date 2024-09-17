@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.ElementType;
@@ -16,68 +15,51 @@ import java.lang.annotation.Target;
 import java.util.List;
 
 import dev.frozenmilk.dairy.core.Feature;
-import dev.frozenmilk.dairy.core.FeatureRegistrar;
 import dev.frozenmilk.dairy.core.dependency.Dependency;
 import dev.frozenmilk.dairy.core.dependency.annotation.SingleAnnotation;
 import dev.frozenmilk.dairy.core.wrapper.Wrapper;
-import kotlin.annotation.MustBeDocumented;
 
 public class BulkReads implements Feature {
-    private final Dependency<?> dependency =
-            new SingleAnnotation<>(Attach.class)
-                    .onResolve((attach) -> { });
+    private Dependency<?> dependency = new SingleAnnotation<>(Attach.class);
     @NonNull
     @Override
     public Dependency<?> getDependency() { return dependency; }
+    
+    @Override
+    public void setDependency(@NonNull Dependency<?> dependency) {
+        this.dependency = dependency;
+    }
 
-    private BulkReads() { FeatureRegistrar.registerFeature(this); }
-
-    private static final BulkReads INSTANCE = new BulkReads();
-    private static Telemetry telemetry;
+    private BulkReads() {}
+    public static final BulkReads INSTANCE = new BulkReads();
     private static List<LynxModule> allHubs;
-
     private void clearCache(){ for (LynxModule hub : allHubs) { hub.clearBulkCache(); }}
-
-
     @Override
     public void preUserInitHook(@NotNull Wrapper opMode) {}
 
     @Override
     public void postUserInitHook(@NotNull Wrapper opMode) {
-        telemetry = opMode.getOpMode().telemetry;
-        HardwareMap hardwareMap = opMode.getOpMode().hardwareMap;
-        allHubs = hardwareMap.getAll(LynxModule.class);
-
+        allHubs = opMode.getOpMode().hardwareMap.getAll(LynxModule.class);
         for (LynxModule hub : allHubs) { hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL); }
-        telemetry.addLine("Bulkreads Attached");
     }
 
     @Override
     public void preUserInitLoopHook(@NotNull Wrapper opMode) { clearCache(); }
 
     @Override
-    public void postUserInitLoopHook(@NotNull Wrapper opMode) { }
-
-    @Override
     public void preUserStartHook(@NotNull Wrapper opMode) { clearCache(); }
-
-    @Override
-    public void postUserStartHook(@NotNull Wrapper opMode) { }
 
     @Override
     public void preUserLoopHook(@NotNull Wrapper opMode) { clearCache(); }
 
     @Override
-    public void postUserLoopHook(@NotNull Wrapper opMode) { }
-
-    @Override
     public void preUserStopHook(@NotNull Wrapper opMode) { clearCache(); }
-
+    
     @Override
-    public void postUserStopHook(@NotNull Wrapper opMode) { }
+    public void cleanup(@NonNull Wrapper opMode) { allHubs.clear(); }
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    @MustBeDocumented
     @Inherited
-    public @interface Attach { }
+    public @interface Attach {}
 }
